@@ -20,26 +20,40 @@ module.exports = yeoman.Base.extend({
             name: 'appname',
             message: 'What would you like the angular app/module name to be?',
             default: path.basename(process.cwd())
+        }, {
+            name: 'router',
+            type:'list',
+            message: 'Which router would you like to use?',
+            default: 0,
+            choices: ['Standard Angular Router','Angular UI Router']
         }];
 
         this.prompt(prompts).then(function (props) {
             this.appname = props.appname;
+
+            if (props.router === 'Angular UI Router') {
+              this.uirouter = true;
+              this.routerNPMName = "angular-ui-router";
+              this.routerNPMVersion = "~0.3";
+              this.routerModuleName = 'ui.router';
+              this.routerViewDirective = 'ui-view';
+            } else {
+              this.uirouter = false;
+              this.routerNPMName = "angular-route";
+              this.routerNPMVersion = "^1.5.8";
+              this.routerModuleName = 'ngRoute';
+              this.routerViewDirective = 'ng-view';
+            }
+            this.config.set('uirouter',this.uirouter);
+
             cb();
         }.bind(this));
-   
-        //maybe add ui router support
-        this.uirouter = false;
-        this.routerJs = 'bower_components/angular-route/angular-route.js';
-        this.routerModuleName = 'angular-route';
-        this.routerViewDirective = 'ng-view';
-        this.config.set('uirouter',this.uirouter);
-
     },
 
     install: function() {
 
-        this.directory('skeleton/','./'); 
-        
+        this.directory('skeleton/','./');
+
         this.config.set('modalDirectory','modal/');
         this.config.set('directiveDirectory','directive/');
         this.config.set('filterDirectory','filter/');
@@ -62,7 +76,7 @@ module.exports = yeoman.Base.extend({
         this.config.save();
         this.installDependencies({ bower: false, callback: () => {
             this.spawnCommandSync('typings', ['install']);
-        } });        
+        } });
     }
 
 });
